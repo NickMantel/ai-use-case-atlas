@@ -10,7 +10,7 @@ test:
 	python -m pytest -q
 
 run:
-	uvicorn app.main:app --reload --port 8000
+	.venv/bin/python -m uvicorn app.main:app --reload --port 8000
 
 docker:
 	docker build -t ai-use-case-atlas .

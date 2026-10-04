@@ -23,10 +23,13 @@ Exports: backlog (Excel, CSV), portfolio pack (PowerPoint: ranked DFV table, siz
 ## Quick start (laptop)
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements-dev.txt
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
 cp .env.example .env            # optional; defaults work offline
-uvicorn app.main:app --reload --port 8000
+.venv/bin/python -m uvicorn app.main:app --reload --port 8000
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m uvicorn app.main:app --reload --port 8000
 ```
 
 Open http://localhost:8000. With the defaults it runs fully offline: `LLM_PROVIDER=stub` uses labelled keyword heuristics instead of a model, `CATALOG_ADAPTER=demo` uses a synthetic university catalogue, and illustrative data from the worked example is loaded into an empty database.
