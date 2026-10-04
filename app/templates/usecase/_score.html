@@ -1,0 +1,47 @@
+{% import "macros.html" as m %}
+{% set sug = uc.score_suggestion or {} %}
+<div class="row between" style="margin-bottom:1rem">
+  <p class="muted" style="margin:0;max-width:60rem">Scoring on these three lenses checks that we build solutions real people want, that the platform can realistically deliver, and that drive measurable value. The model proposes; the people in the room decide.</p>
+  <form method="post" action="/usecases/{{ uc.ref }}/ai/score">{{ m.ai_button('Suggest ratings', 'Assessing…') }}</form>
+</div>
+{% if sug.summary %}<div class="suggestion"><div class="head"><span>{{ sug.summary }}</span>{{ m.stub_tag(sug.meta) }}</div></div>{% endif %}
+
+<form method="post" action="/usecases/{{ uc.ref }}/score">
+  <input type="hidden" name="source" value="{{ 'ai' if sug and not uc.scores else 'human' }}">
+  <div class="grid g3">
+    {% for lens in fw.lenses %}
+    {% set s = (sug.lenses or {}).get(lens.key) %}
+    {% set current = uc.scores.get(lens.key) or (s.level if s else none) %}
+    <div class="card lens">
+      <h3>{{ lens.label }} {% if s %}<small class="muted">AI: {{ fw.level_labels[s.level] }}</small>{% endif %}</h3>
+      <p class="muted" style="margin:0">{{ lens.summary }}</p>
+      <ul>{% for q in lens.questions %}<li>{{ q }}</li>{% endfor %}</ul>
+      <div class="seg" role="radiogroup" aria-label="{{ lens.label }} rating">
+        {% for lvl in fw.levels %}
+        <label><input type="radio" name="level_{{ lens.key }}" value="{{ lvl.key }}" {{ 'checked' if current == lvl.key }}>{{ lvl.label }}</label>
+        {% endfor %}
+      </div>
+      {% if s %}
+      <div class="suggestion" style="margin-top:.8rem">
+        <div class="head"><span>Why {{ fw.level_labels[s.level] }}</span><span class="chip">confidence {{ s.confidence }}</span></div>
+        <div>{{ s.rationale }}</div>
+        <ol>{% for a in s.question_answers %}<li>{{ a }}</li>{% endfor %}</ol>
+        {% if s.missing_information %}<div style="margin-top:.3rem"><strong>Missing:</strong> {{ s.missing_information|join('; ') }}</div>{% endif %}
+      </div>
+      {% endif %}
+      <div class="field" style="margin-top:.8rem"><label for="note_{{ lens.key }}">Notes from the discussion</label>
+        <textarea id="note_{{ lens.key }}" name="note_{{ lens.key }}" rows="3">{{ uc.score_notes.get(lens.key, '') }}</textarea></div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="row" style="margin-top:1rem">
+    <button type="submit">Save ratings</button>
+    <span class="muted">{{ explanation }}</span>
+  </div>
+</form>
+
+<form class="card soft" method="post" action="/usecases/{{ uc.ref }}/rank" style="margin-top:1rem">
+  <h3>Agreed rank at portfolio review</h3>
+  <p class="muted" style="font-size:.88rem">The computed rank is {{ computed_rank or 'not available until all lenses are rated' }}. Set an agreed rank when the review decides otherwise (it takes precedence and is logged). Leave blank to clear.</p>
+  <div class="row"><input type="number" min="1" name="agreed_rank" value="{{ uc.agreed_rank or '' }}" style="width:7rem"><button type="submit" class="secondary">Set rank</button></div>
+</form>

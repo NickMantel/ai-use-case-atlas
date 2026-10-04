@@ -1,0 +1,9 @@
+<div class="card">
+  <h2>Audit trail</h2>
+  <p class="muted" style="font-size:.85rem">Every change, AI suggestion and decision, newest first. AI suggestions are recorded separately from what people agreed.</p>
+  <ul class="timeline">
+    {% for e in uc.events %}
+    <li class="k-{{ e.kind }}">{{ e.summary }}<div class="meta">{{ e.kind }} · {{ e.actor }} · {{ e.at.strftime('%d %b %Y %H:%M:%S') }} UTC</div></li>
+    {% endfor %}
+  </ul>
+</div>

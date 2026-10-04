@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Use case portfolio</h1>
+    <p class="subtitle">{{ fw.raw.brand.tagline }}. {{ total }} use case{{ 's' if total != 1 }} captured.</p>
+  </div>
+  <div class="row">
+    <a class="btn" href="/usecases/new">Capture a use case</a>
+    <a class="btn secondary" href="/rounds">Import workshop notes</a>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:1rem">
+  <div class="row between" style="margin-bottom:1.1rem">
+    <h2 style="margin:0">A standing cycle, not a one-off exercise</h2>
+    <a href="/framework" class="muted" style="font-size:.85rem">Owners and cadence</a>
+  </div>
+  <div class="cycle">
+    {% for s in stages %}
+    <a class="card soft stage" href="/backlog?stage={{ s.key }}" style="text-decoration:none">
+      <span class="num">{{ s.number }}</span>
+      <h3 style="margin-bottom:.3rem">{{ s.title }}</h3>
+      <div class="count">{{ s.count }}</div>
+      <dl>
+        {% for label, n in s.breakdown %}<dt>{{ label }}:</dt> <dd>{{ n }}</dd>{% endfor %}
+      </dl>
+    </a>
+    {% endfor %}
+  </div>
+  <p class="muted" style="margin:.9rem 0 0;font-size:.85rem">Off the main flow: {% for label, n in off_flow %}{{ label }} {{ n }}{{ ', ' if not loop.last }}{% endfor %}.</p>
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <div class="row between"><h2 style="margin:0">Current top priorities</h2><a href="/portfolio" style="font-size:.85rem">Portfolio view</a></div>
+    {% if ranked %}
+    <div class="table-wrap"><table style="margin-top:.6rem">
+      <thead><tr><th class="num">#</th><th>Use case</th>{% for lens in fw.lenses %}<th class="num">{{ lens.label[0] }}</th>{% endfor %}<th>Size</th></tr></thead>
+      <tbody>
+      {% for item in ranked %}{% set u = item.use_case %}
+        <tr>
+          <td class="num"><strong>{{ item.computed_rank }}</strong></td>
+          <td class="title-cell"><a href="/usecases/{{ u.ref }}">{{ u.title }}</a><div class="story">{{ u.ref }} · {{ u.domain or 'No domain' }}</div></td>
+          {% for k in fw.lens_keys %}<td class="num">{{ m.level(fw, u.scores.get(k)) }}</td>{% endfor %}
+          <td>{{ m.size(fw, u.size) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}<div class="empty-state">Nothing scored yet. Size and score use cases to see a ranking.</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Needs attention</h2>
+    {% if attention %}
+    <div class="table-wrap"><table>
+      <tbody>
+      {% for u in attention %}
+        <tr><td class="title-cell"><a href="/usecases/{{ u.ref }}">{{ u.title }}</a><div class="story">{{ u.ref }} · {{ u.story or 'Story not yet written' }}</div></td>
+            <td style="text-align:right">{{ m.status(fw, u.status) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}<div class="empty-state">No use cases waiting for review.</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Recent activity</h2>
+    <ul class="timeline">
+      {% for e in events %}
+      <li class="k-{{ e.kind }}"><a href="/usecases/{{ e.use_case.ref }}">{{ e.use_case.ref }}</a> {{ e.summary }}
+        <div class="meta">{{ e.actor }} · {{ e.at.strftime('%d %b %Y %H:%M') }}</div></li>
+      {% else %}<li>No activity yet.</li>{% endfor %}
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="row between"><h2 style="margin:0">Workshops</h2><a href="/rounds" style="font-size:.85rem">All workshops</a></div>
+    <div class="table-wrap"><table style="margin-top:.6rem"><tbody>
+      {% for r in rounds %}
+      <tr><td class="title-cell"><a href="/rounds/{{ r.id }}">{{ r.name }}</a><div class="story">{{ r.held_on.strftime('%d %b %Y') if r.held_on else 'No date' }} · {{ r.use_cases|length }} use cases</div></td></tr>
+      {% else %}<tr><td class="muted">No workshops yet.</td></tr>{% endfor %}
+    </tbody></table></div>
+    <div class="row" style="margin-top:.8rem"><a class="btn secondary small" href="/export/backlog.xlsx">Backlog (Excel)</a><a class="btn secondary small" href="/export/portfolio.pptx">Portfolio pack (PowerPoint)</a></div>
+  </div>
+</div>
+{% endblock %}

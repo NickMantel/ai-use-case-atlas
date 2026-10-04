@@ -1,0 +1,289 @@
+# AI Use Case Atlas framework definition (Mantel default).
+#
+# Everything a client is likely to tailor lives here: workshop questions,
+# scoring lenses, sizing matrix, Lean Canvas sections, workflow stages and
+# qualification checks. A client overlay (e.g. frameworks/deakin.yaml) is
+# deep-merged on top of this file; lists in the overlay replace lists here.
+
+brand:
+  product_name: AI Use Case Atlas
+  org_name: Mantel
+  client_name: ""
+  tagline: Problems first, ideas second
+  colours:
+    ink: "#13294b"        # headings, navy
+    accent: "#b04a68"     # section titles, rose
+    blue: "#5b84c4"
+    blue_light: "#83a7d6"
+    green: "#4a7a6e"
+    green_light: "#79aba0"
+    rose_light: "#c97386"
+    surface: "#f7f9fc"
+    border: "#d3deee"
+
+workshop:
+  principle: >-
+    Workshops surface problems first, ideas second. The gap between today and
+    the ideal world is the use case, not a wish list.
+  sections:
+    - key: today
+      title: Today
+      questions:
+        - key: time_lost
+          text: Where do you lose the most time to manual work or chasing data?
+        - key: low_confidence_decision
+          text: What decision do you make with the least confidence today?
+        - key: untrusted_numbers
+          text: Which numbers do different people not fully trust?
+    - key: ideal
+      title: Ideal world
+      questions:
+        - key: stop_doing
+          text: If this were solved, what would you stop doing?
+        - key: better_decision
+          text: Who would make a faster or better decision, and how much faster?
+        - key: six_months
+          text: What would good look like in six months?
+  story:
+    template: "As a {role}, I need {need}, so that {outcome}."
+    example: >-
+      As a faculty workload planner, I need an early view of unit enrolment
+      trends, so that I can adjust tutor allocations before term starts.
+
+solution_types:
+  - key: bi
+    label: BI and reporting
+  - key: analytics
+    label: Advanced analytics / ML
+  - key: genai
+    label: Generative AI
+  - key: agentic
+    label: Agentic AI
+  - key: data_product
+    label: Data product / foundation
+  - key: non_data
+    label: Process or system fix (not a data use case)
+
+qualification:
+  description: >-
+    A use case is qualified when it is specific enough to size and score.
+    Unqualified items are parked with a reason, not deleted.
+  checks:
+    - key: named_role
+      text: A named role or team would use the output
+    - key: real_problem
+      text: The problem is felt today (evidence from the Today questions)
+    - key: gap_clear
+      text: The gap between today and the ideal world is stated
+    - key: lead_identified
+      text: A use case lead is identified to own the content
+    - key: data_solvable
+      text: It is solvable with data, analytics or AI (not purely a process or system fix)
+  outcomes:
+    - key: qualified
+      label: Qualified
+    - key: parked
+      label: Parked (needs more information)
+    - key: rejected
+      label: Not progressing
+    - key: merged
+      label: Merged into another use case
+
+scoring:
+  levels:
+    - key: H
+      label: High
+      points: 3
+    - key: M
+      label: Medium
+      points: 2
+    - key: L
+      label: Low
+      points: 1
+  lenses:
+    - key: desirability
+      label: Desirability
+      summary: Real people actually want it
+      weight: 1.0
+      questions:
+        - Does it solve a problem staff or students feel today?
+        - Would the named role actually use the output?
+    - key: feasibility
+      label: Feasibility
+      summary: The technology and team can realistically deliver it
+      weight: 1.0
+      questions:
+        - Is the data available, accessible and good enough?
+        - Can the data platform team build and support it with current capability?
+    - key: viability
+      label: Viability
+      summary: It drives measurable business value
+      weight: 1.0
+      questions:
+        - Does it justify the ongoing cost to run and maintain?
+        - Does it hold up against competing priorities?
+  # Flags raised on the backlog when a lens scores Low.
+  flags:
+    desirability: Validate demand before investing
+    feasibility: Data foundations needed first
+    viability: Value case needs strengthening
+
+sizing:
+  rows:
+    title: Scope and complexity
+    levels:
+      - key: L
+        label: Low
+        description: Single output, one source, standard refresh
+      - key: M
+        label: Medium
+        description: A few outputs or integrations, 2-3 sources
+      - key: H
+        label: High
+        description: Many outputs, multi-step or agentic, 3+ sources, complex access
+  columns:
+    title: Build effort and data availability
+    levels:
+      - key: L
+        label: Low effort
+        description: "Reuse: pipelines/models already exist"
+      - key: M
+        label: Medium effort
+        description: "Develop: source is stable"
+      - key: H
+        label: High effort
+        description: Build from scratch
+  # matrix[row][column] -> size key
+  matrix:
+    L: {L: XS, M: S, H: M}
+    M: {L: S, M: M, H: L}
+    H: {L: M, M: L, H: XL}
+  sizes:
+    - key: XS
+      label: X-Small
+      weeks: "~0.5-1 week"
+      order: 1
+      colour: "#79aba0"
+    - key: S
+      label: Small
+      weeks: "~1-2 weeks"
+      order: 2
+      colour: "#4a7a6e"
+    - key: M
+      label: Medium
+      weeks: "~2-4 weeks"
+      order: 3
+      colour: "#83a7d6"
+    - key: L
+      label: Large
+      weeks: "~4-6 weeks"
+      order: 4
+      colour: "#5b84c4"
+    - key: XL
+      label: X-Large
+      weeks: "~6-8+ weeks, plus review time for novel AI patterns"
+      order: 5
+      colour: "#c97386"
+  next_step: >-
+    Once you have the effort sizing, discuss the value and strategic alignment
+    of each use case to agree on the priority and sequencing for the delivery
+    backlog.
+
+lean_canvas:
+  title: Lean Canvas
+  subtitle: Framework for defining data, analytics, and AI use cases
+  sections:
+    - key: business_problem
+      title: Business Problem Statement
+      guidance: Describe the core business challenge, operational inefficiencies, or compliance requirements that need to be addressed.
+    - key: solution_description
+      title: Solution Description
+      guidance: Outline the proposed data architecture, platform components, data modelling approach, and target consumption tools (e.g., BI dashboards, ad-hoc SQL).
+    - key: systems_data_tech
+      title: Systems, Data & Tech
+      guidance: Detail source applications, databases, analytics platforms, and reporting technologies required.
+    - key: capability_requirements
+      title: Capability Requirements
+      guidance: Specify core technical skills needed (e.g., source analysis, data engineering, modelling).
+    - key: business_users
+      title: Business Users
+      guidance: Identify key internal teams and external stakeholders who will consume or benefit from this data.
+    - key: estimated_benefits
+      title: Estimated Benefits
+      guidance: Summarise expected outcomes, time savings, regulatory compliance, risk reduction, and value creation.
+    - key: data_foundations
+      title: Data Foundations Established
+      guidance: Highlight reusable data assets, central metrics, or core infrastructure created for future use.
+    - key: required_data
+      title: Required Data
+      guidance: List key data domains, core entities, source schemas, reference data, and lookup tables needed.
+    - key: assumptions_risks
+      title: Assumptions, Risks & Dependencies
+      guidance: Document key assumptions, delivery or technical risks, scope boundaries, and critical external dependencies.
+    - key: estimated_resources
+      title: Estimated Resources
+      guidance: List delivery team roles, technical expertise required, and client subject matter experts needed.
+
+workflow:
+  accountable_owner: >-
+    The data platform team runs the cycle end to end; domain owners and use
+    case leads own the content that feeds it.
+  maturity_note: >-
+    A workshop-paced cadence while volume is low, moving to a standing monthly
+    or quarterly review as intake grows.
+  stages:
+    - key: ideation
+      number: 1
+      title: Ideation
+      owner: Use case lead with data platform team facilitation
+      cadence: Each time an intake round opens
+      statuses: [captured, in_review]
+    - key: sizing
+      number: 2
+      title: Sizing
+      owner: Use case lead and data platform team together
+      cadence: Within a week of intake
+      statuses: [qualified, sized]
+    - key: prioritisation
+      number: 3
+      title: Prioritisation and scoring
+      owner: Domain owners and the data platform team
+      cadence: Each portfolio review
+      statuses: [scored, prioritised]
+    - key: governance
+      number: 4
+      title: Governance and sequencing
+      owner: Data platform team
+      cadence: Immediately following each review
+      statuses: [approved]
+
+  statuses:
+    - key: captured
+      label: Captured
+    - key: in_review
+      label: In review
+    - key: qualified
+      label: Qualified
+    - key: sized
+      label: Sized
+    - key: scored
+      label: Scored
+    - key: prioritised
+      label: Prioritised
+    - key: approved
+      label: Approved for delivery backlog
+    - key: parked
+      label: Parked
+    - key: rejected
+      label: Not progressing
+    - key: merged
+      label: Merged
+
+domains:
+  - Student
+  - Finance
+  - Teaching and Learning
+  - Research
+  - People
+  - Operations
+  - Other

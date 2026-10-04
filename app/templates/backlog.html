@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}Backlog · {{ fw.raw.brand.product_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Use case backlog</h1><p class="subtitle">Review, qualify and prioritise. Ranked by agreed rank, then weighted DFV, then size.</p></div>
+  <div class="row">
+    <a class="btn secondary" href="/export/backlog.xlsx">Excel</a>
+    <a class="btn secondary" href="/export/backlog.csv">CSV</a>
+    <a class="btn secondary" href="/export/canvases.pptx">All canvases</a>
+    <a class="btn" href="/usecases/new">Capture</a>
+  </div>
+</div>
+
+<form class="card soft row" method="get" action="/backlog" style="margin-bottom:1rem">
+  <input type="search" name="q" value="{{ filters.q }}" placeholder="Search title, story, lead" style="flex:2;min-width:12rem">
+  <select name="stage" style="flex:1;min-width:10rem"><option value="">All stages</option>{% for s in fw.raw.workflow.stages %}<option value="{{ s.key }}" {{ 'selected' if filters.stage == s.key }}>{{ s.number }}. {{ s.title }}</option>{% endfor %}</select>
+  <select name="domain" style="flex:1;min-width:10rem"><option value="">All domains</option>{% for d in domains %}<option {{ 'selected' if filters.domain == d }}>{{ d }}</option>{% endfor %}</select>
+  <select name="size" style="flex:1;min-width:8rem"><option value="">All sizes</option>{% for s in fw.sizes %}<option value="{{ s.key }}" {{ 'selected' if filters.size == s.key }}>{{ s.label }}</option>{% endfor %}</select>
+  <label class="row" style="font-weight:400;margin:0;gap:.35rem"><input type="checkbox" name="show_closed" value="1" {{ 'checked' if filters.show_closed }}> Include parked</label>
+  <button type="submit" class="secondary">Filter</button>
+</form>
+
+<div class="card">
+  {% if ranked %}
+  <div class="table-wrap"><table>
+    <thead><tr>
+      <th class="num">Rank</th><th>Use case</th><th>Status</th><th>Domain</th><th>Lead</th><th>Size</th>
+      {% for lens in fw.lenses %}<th class="num">{{ lens.label }}</th>{% endfor %}
+      <th class="num">Score</th><th>Flags</th>
+    </tr></thead>
+    <tbody>
+    {% for item in ranked %}{% set u = item.use_case %}
+      <tr>
+        <td class="num"><strong>{{ item.computed_rank or '-' }}</strong>{% if u.agreed_rank %}<div class="muted" style="font-size:.7rem">agreed</div>{% endif %}</td>
+        <td class="title-cell" style="min-width:16rem"><a href="/usecases/{{ u.ref }}">{{ u.title }}</a><div class="story">{{ u.ref }} · {{ u.story or 'Story not yet written' }}</div></td>
+        <td>{{ m.status(fw, u.status) }}</td>
+        <td>{{ u.domain or '-' }}</td>
+        <td>{{ u.use_case_lead or '-' }}</td>
+        <td>{{ m.size(fw, u.size) }}</td>
+        {% for k in fw.lens_keys %}<td class="num">{{ m.level(fw, u.scores.get(k)) }}</td>{% endfor %}
+        <td class="num">{{ '%g'|format(item.score) if item.score is not none else '-' }}</td>
+        <td>{% for f in item.flags %}<span class="flag">{{ f }}</span>{% endfor %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+  <div class="empty-state">No use cases match. <a href="/usecases/new">Capture one</a> or <a href="/rounds">import workshop notes</a>.</div>
+  {% endif %}
+</div>
+{% endblock %}

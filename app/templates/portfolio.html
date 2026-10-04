@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}Portfolio · {{ fw.raw.brand.product_name }}{% endblock %}
+{% block content %}
+{% set c = fw.raw.brand.colours %}
+<div class="page-head">
+  <div><h1>Portfolio review</h1><p class="subtitle">Size and effort first, then value and strategic alignment to agree priority and sequencing.</p></div>
+  <a class="btn" href="/export/portfolio.pptx">Export portfolio pack</a>
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <h2>Scoring on desirability, feasibility and viability</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="num">Priority</th><th>Use case</th>{% for lens in fw.lenses %}<th class="num">{{ lens.label }}</th>{% endfor %}<th>Size</th></tr></thead>
+      <tbody>
+      {% for item in ranked if item.score is not none %}{% set u = item.use_case %}
+        <tr title="{{ item.explanation }}">
+          <td class="num"><strong>{{ item.computed_rank }}</strong></td>
+          <td class="title-cell"><a href="/usecases/{{ u.ref }}">{{ u.title }}</a><div class="story">{{ u.ref }}{% for f in item.flags %} · <span class="flag">{{ f }}</span>{% endfor %}</div></td>
+          {% for k in fw.lens_keys %}<td class="num">{{ m.level(fw, u.scores.get(k)) }}</td>{% endfor %}
+          <td>{{ m.size(fw, u.size) }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="empty-state">Nothing scored yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% set unscored = ranked|selectattr('score', 'none')|list %}
+    {% if unscored %}<p class="muted" style="margin-top:.8rem;font-size:.85rem">{{ unscored|length }} not yet scored: {% for i in unscored %}<a href="/usecases/{{ i.use_case.ref }}?tab=score">{{ i.use_case.ref }}</a>{{ ', ' if not loop.last }}{% endfor %}</p>{% endif %}
+  </div>
+
+  <div class="card plot">
+    <h2>Value against effort</h2>
+    <p class="muted" style="font-size:.85rem;margin-bottom:.4rem">Value is the average of desirability and viability. Effort is the t-shirt size. Colour shows feasibility.</p>
+    {% set W, H, L, T, PW, PH = 640, 380, 84, 20, 536, 300 %}
+    <svg viewBox="0 0 {{ W }} {{ H }}" role="img" aria-label="Scatter plot of value against effort">
+      <rect x="{{ L }}" y="{{ T }}" width="{{ PW / 2 }}" height="{{ PH / 2 }}" fill="#eef7f2"/>
+      <text x="{{ L + 8 }}" y="{{ T + 16 }}" font-size="11" fill="{{ c.green }}" font-weight="700">Quick wins</text>
+      <text x="{{ L + PW - 8 }}" y="{{ T + 16 }}" font-size="11" fill="{{ c.blue }}" font-weight="700" text-anchor="end">Strategic bets</text>
+      <text x="{{ L + 8 }}" y="{{ T + PH - 8 }}" font-size="11" fill="#8a96a8">Fill-ins</text>
+      <text x="{{ L + PW - 8 }}" y="{{ T + PH - 8 }}" font-size="11" fill="#8a96a8" text-anchor="end">Reconsider</text>
+      <rect x="{{ L }}" y="{{ T }}" width="{{ PW }}" height="{{ PH }}" fill="none" stroke="#d3deee"/>
+      <line x1="{{ L + PW / 2 }}" y1="{{ T }}" x2="{{ L + PW / 2 }}" y2="{{ T + PH }}" stroke="#d3deee" stroke-dasharray="4 4"/>
+      <line x1="{{ L }}" y1="{{ T + PH / 2 }}" x2="{{ L + PW }}" y2="{{ T + PH / 2 }}" stroke="#d3deee" stroke-dasharray="4 4"/>
+      {% for s in fw.sizes %}
+        {% set x = L + 30 + (s.order - 1) * (PW - 60) / 4 %}
+        <text x="{{ x }}" y="{{ T + PH + 18 }}" font-size="11" fill="#5d6d83" text-anchor="middle">{{ s.label }}</text>
+      {% endfor %}
+      <text x="{{ L + PW / 2 }}" y="{{ H - 4 }}" font-size="11" fill="#5d6d83" text-anchor="middle">Effort (size)</text>
+      {% for lvl in fw.levels %}
+        {% set y = T + PH - 25 - (lvl.points - 1) * (PH - 50) / 2 %}
+        <text x="{{ L - 8 }}" y="{{ y + 4 }}" font-size="11" fill="#5d6d83" text-anchor="end">{{ lvl.label }}</text>
+      {% endfor %}
+      <text x="14" y="{{ T + PH / 2 }}" font-size="11" fill="#5d6d83" text-anchor="middle" transform="rotate(-90 14 {{ T + PH / 2 }})">Value</text>
+      {% set fcol = {'H': c.green, 'M': c.blue, 'L': c.accent} %}
+      {% for p in plot %}
+        {% set x = L + 30 + (p.effort - 1) * (PW - 60) / 4 + (p.slot * 16) %}
+        {% set y = T + PH - 25 - (p.value - 1) * (PH - 50) / 2 - (p.slot * 14) %}
+        <a href="/usecases/{{ p.uc.ref }}">
+          <circle cx="{{ x }}" cy="{{ y }}" r="11" fill="{{ fcol.get(p.feas, '#8a96a8') }}" stroke="#fff" stroke-width="2"><title>{{ p.uc.ref }} {{ p.uc.title }} (rank {{ p.rank }})</title></circle>
+          <text x="{{ x }}" y="{{ y + 4 }}" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">{{ p.rank }}</text>
+        </a>
+      {% endfor %}
+    </svg>
+    <div class="legend"><span><i style="background: {{ c.green }}"></i>Feasibility high</span><span><i style="background: {{ c.blue }}"></i>Medium</span><span><i style="background: {{ c.accent }}"></i>Low</span><span>Numbers are priority ranks</span></div>
+  </div>
+
+  <div class="card span2">
+    <h2>Size and effort read</h2>
+    {% set sz = fw.raw.sizing %}
+    <div class="matrix">
+      <div></div>
+      {% for col in sz.columns.levels %}<div class="colhead"><strong>{{ col.label }}</strong><span>{{ col.description }}</span></div>{% endfor %}
+      {% for row in sz.rows.levels %}
+        <div class="rowhead"><strong>{{ row.label }}</strong><span>{{ row.description }}</span></div>
+        {% for col in sz.columns.levels %}
+          {% set s = fw.size_by_key[sz.matrix[row.key][col.key]] %}
+          <div class="cell" style="background: {{ s.colour }}">{{ s.label }}
+            <div class="refs">{% for u in cells.get((row.key, col.key), []) %}<a href="/usecases/{{ u.ref }}" title="{{ u.title }}">{{ u.ref }}</a>{{ ' ' if not loop.last }}{% endfor %}</div>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    <div class="legend" style="margin-top:.8rem">{% for s in fw.sizes %}<span><i style="background: {{ s.colour }}"></i>{{ s.label }} {{ s.weeks }}</span>{% endfor %}</div>
+  </div>
+</div>
+{% endblock %}

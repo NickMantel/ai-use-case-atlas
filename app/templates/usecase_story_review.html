@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Review the drafted story · {{ uc.ref }}</h1>
+    <p class="subtitle">Edit anything that does not match what the stakeholder said, then apply.</p>
+  </div>
+  <a class="btn secondary" href="/usecases/{{ uc.ref }}">Skip</a>
+</div>
+<div class="grid g2">
+  <div class="card">
+    <h2 class="section-title">As captured</h2>
+    <div class="story-box">{{ uc.story or 'No story captured' }}</div>
+    <p style="margin-top:.8rem"><strong>Gap:</strong> {{ uc.gap_statement or 'Not captured' }}</p>
+    <div class="qa">
+      {% for q in fw.workshop_questions %}{% set a = uc.workshop_answers.get(q.key) %}
+      {% if a %}<div><div class="q">{{ q.text }}</div><div class="a">{{ a }}</div></div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="row between"><h2 class="section-title" style="margin:0">Suggested</h2>{{ m.stub_tag(draft.meta) }}</div>
+    {% include "partials/story_form.html" %}
+  </div>
+</div>
+{% endblock %}

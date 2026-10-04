@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}{{ rnd.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ rnd.name }}</h1>
+    <p class="subtitle">{{ rnd.held_on.strftime('%d %B %Y') if rnd.held_on else 'No date' }} · {{ rnd.domain or 'Mixed domains' }}{% if rnd.facilitator %} · facilitated by {{ rnd.facilitator }}{% endif %}</p>
+  </div>
+  <a class="btn" href="/usecases/new?round_id={{ rnd.id }}">Capture a use case</a>
+</div>
+<div class="grid g2">
+  <div class="card">
+    <h2>Use cases from this workshop</h2>
+    <div class="table-wrap"><table><tbody>
+      {% for u in rnd.use_cases %}
+      <tr><td class="title-cell"><a href="/usecases/{{ u.ref }}">{{ u.title }}</a><div class="story">{{ u.ref }} · {{ u.story or 'Story not yet written' }}</div></td>
+          <td style="text-align:right">{{ m.status(fw, u.status) }}</td></tr>
+      {% else %}<tr><td class="empty-state">None yet.</td></tr>{% endfor %}
+    </tbody></table></div>
+    {% if rnd.attendees %}<p class="muted" style="margin-top:.8rem"><strong>Attendees:</strong> {{ rnd.attendees }}</p>{% endif %}
+  </div>
+  <form class="card" method="post" action="/rounds/{{ rnd.id }}/extract">
+    <h2>Import notes or a transcript</h2>
+    <p class="muted">Paste sticky-note text, scribe notes or a meeting transcript. The model proposes candidate use cases, one per distinct gap, each tied to a named role. You choose which to keep.</p>
+    <div class="field"><label for="notes">Workshop notes</label><textarea id="notes" name="notes" rows="12" required placeholder="- Workload planners rebuild the tutor allocation spreadsheet every trimester from three exports and still get it wrong before census&#10;- Finance business partners spend two days writing variance commentary..."></textarea></div>
+    {{ m.ai_button('Find use cases', 'Reading notes…') }}
+  </form>
+  {% if rnd.notes %}
+  <div class="card span2"><details><summary>Notes on file</summary><pre style="white-space:pre-wrap;margin-top:.6rem">{{ rnd.notes }}</pre></details></div>
+  {% endif %}
+</div>
+{% endblock %}

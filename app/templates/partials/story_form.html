@@ -1,0 +1,17 @@
+<form method="post" action="/usecases/{{ uc.ref }}/story/apply">
+  <div class="story-box" data-story-preview data-placeholder="">As {{ draft.role|article }} {{ draft.role }}, I need {{ draft.need }}, so that {{ draft.outcome }}.</div>
+  <div class="field" style="margin-top:.8rem"><label>Title</label><input type="text" name="title" value="{{ draft.title }}"></div>
+  <div class="field"><label>As a</label><input type="text" name="role" value="{{ draft.role }}"></div>
+  <div class="field"><label>I need</label><textarea name="need" rows="2">{{ draft.need }}</textarea></div>
+  <div class="field"><label>So that</label><textarea name="outcome" rows="2">{{ draft.outcome }}</textarea></div>
+  <div class="field"><label>The gap</label><textarea name="gap_statement" rows="3">{{ draft.gap_statement }}</textarea></div>
+  <div class="field"><label>Solution type</label>
+    <select name="solution_type"><option value="">Keep current</option>
+      {% for s in fw.raw.solution_types %}<option value="{{ s.key }}" {{ 'selected' if draft.solution_type == s.key }}>{{ s.label }}</option>{% endfor %}
+    </select>
+  </div>
+  {% if draft.follow_up_questions %}
+  <div class="suggestion"><div class="head">Ask next</div><ol>{% for q in draft.follow_up_questions %}<li>{{ q }}</li>{% endfor %}</ol></div>
+  {% endif %}
+  <button type="submit">Apply to {{ uc.ref }}</button>
+</form>

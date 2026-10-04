@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block content %}
+{% set qmap = {} %}{% for q in fw.workshop_questions %}{% set _ = qmap.update({q.key: q.text}) %}{% endfor %}
+<div class="page-head">
+  <div><h1>Candidate use cases</h1><p class="subtitle">From notes for {{ rnd.name }}. Untick anything that is not a real gap. You can edit everything after adding.</p></div>
+  {{ m.stub_tag(result.meta) }}
+</div>
+<form method="post" action="/rounds/{{ rnd.id }}/accept">
+  <input type="hidden" name="payload" value="{{ payload }}">
+  <div class="grid g2">
+    {% for c in result.use_cases %}
+    <div class="card">
+      <label class="row" style="justify-content:space-between"><span>Candidate {{ loop.index }}</span><span><input type="checkbox" name="accept" value="{{ loop.index0 }}" checked> Keep</span></label>
+      <div class="field"><input type="text" name="title_{{ loop.index0 }}" value="{{ c.title }}" aria-label="Title"></div>
+      <div class="story-box">As {{ c.role|article }} {{ c.role }}, I need {{ c.need }}, so that {{ c.outcome }}.</div>
+      <p style="margin-top:.7rem"><strong>Gap:</strong> {{ c.gap_statement }}</p>
+      <p class="muted" style="font-size:.85rem">{{ c.domain or 'Domain not identified' }} · {{ c.solution_type or 'Solution type not identified' }}</p>
+      {% if c.answers %}<div class="qa">{% for k, v in c.answers.items() %}<div><div class="q">{{ qmap.get(k, k) }}</div><div class="a">{{ v }}</div></div>{% endfor %}</div>{% endif %}
+      {% if c.evidence %}<details style="margin-top:.6rem"><summary>Evidence from notes</summary><ul>{% for e in c.evidence %}<li>"{{ e }}"</li>{% endfor %}</ul></details>{% endif %}
+    </div>
+    {% else %}
+    <div class="card empty-state">No clear use cases found in those notes.</div>
+    {% endfor %}
+  </div>
+  {% if result.unclear_items %}
+  <div class="card soft" style="margin-top:1rem"><h3>Too vague to capture yet</h3><ul>{% for u in result.unclear_items %}<li>{{ u }}</li>{% endfor %}</ul></div>
+  {% endif %}
+  <div class="row" style="margin-top:1rem"><button type="submit">Add selected to backlog</button><a class="btn secondary" href="/rounds/{{ rnd.id }}">Cancel</a></div>
+</form>
+{% endblock %}

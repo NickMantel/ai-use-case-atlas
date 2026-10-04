@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}How it works · {{ fw.raw.brand.product_name }}{% endblock %}
+{% block content %}
+{% set wf = fw.raw.workflow %}
+<div class="page-head">
+  <div><h1>How it works</h1><p class="subtitle">The method behind the tool. Everything on this page is configured in <code>frameworks/{{ settings.framework }}.yaml</code>.</p></div>
+</div>
+
+<div class="card" style="margin-bottom:1rem">
+  <h2>Governance and sequencing: who owns it, how often it runs</h2>
+  <p><strong>Single accountable owner:</strong> {{ wf.accountable_owner }}</p>
+  <div class="cycle" style="margin-top:1.4rem">
+    {% for s in wf.stages %}
+    <div class="card soft stage">
+      <span class="num">{{ s.number }}</span>
+      <h3>{{ s.title }}</h3>
+      <dl><dt>Owner:</dt> <dd>{{ s.owner }}</dd><dt>Cadence:</dt> <dd>{{ s.cadence }}</dd>
+        <dt>Statuses:</dt> <dd>{% for st in s.statuses %}{{ fw.status_labels[st] }}{{ ', ' if not loop.last }}{% endfor %}</dd></dl>
+    </div>
+    {% endfor %}
+  </div>
+  <p style="margin-top:1rem"><strong class="section-title">How it matures:</strong> {{ wf.maturity_note }}</p>
+  {% if wf.open_questions %}<p><strong class="section-title">To confirm:</strong> {{ wf.open_questions|join(' ') }}</p>{% endif %}
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <h2>1. Ideation: starting with the right questions</h2>
+    <p class="muted">{{ fw.raw.workshop.principle }}</p>
+    <div class="grid g2">
+      {% for section in fw.raw.workshop.sections %}
+      <div><h3 class="section-title">{{ section.title }}</h3><ul>{% for q in section.questions %}<li>{{ q.text }}</li>{% endfor %}</ul></div>
+      {% endfor %}
+    </div>
+    <p><strong>Captured as:</strong></p>
+    <div class="story-box">{{ fw.raw.workshop.story.example }}</div>
+  </div>
+
+  <div class="card">
+    <h2>Qualification</h2>
+    <p class="muted">{{ fw.raw.qualification.description }}</p>
+    <ul>{% for c in fw.raw.qualification.checks %}<li>{{ c.text }}</li>{% endfor %}</ul>
+    <p class="muted" style="font-size:.88rem">Outcomes: {% for o in fw.raw.qualification.outcomes %}{{ o.label }}{{ ', ' if not loop.last }}{% endfor %}. Nothing is deleted; every decision is logged with a note.</p>
+  </div>
+
+  <div class="card span2">
+    <h2>2. Sizing: a repeatable size and effort read</h2>
+    {% set sz = fw.raw.sizing %}
+    <div class="matrix">
+      <div></div>
+      {% for col in sz.columns.levels %}<div class="colhead"><strong>{{ col.label }}</strong><span>{{ col.description }}</span></div>{% endfor %}
+      {% for row in sz.rows.levels %}
+        <div class="rowhead"><strong>{{ row.label }}</strong><span>{{ row.description }}</span></div>
+        {% for col in sz.columns.levels %}{% set s = fw.size_by_key[sz.matrix[row.key][col.key]] %}<div class="cell" style="background: {{ s.colour }}">{{ s.label }}</div>{% endfor %}
+      {% endfor %}
+    </div>
+    <div class="legend" style="margin-top:.8rem">{% for s in fw.sizes %}<span><i style="background: {{ s.colour }}"></i>{{ s.label }} {{ s.weeks }}</span>{% endfor %}</div>
+    <p style="margin-top:.9rem"><strong>Catalogue-informed effort.</strong> The model lists the data each use case needs; the tool searches the data catalogue ({{ catalog_status.label }}).
+      Each need is classed as <em>reuse</em> (a reviewed gold-layer table exists), <em>develop</em> (only raw or silver layers) or <em>build</em> (not found).
+      All reuse suggests Low effort, any build suggests High, otherwise Medium. People confirm the cell.</p>
+  </div>
+
+  <div class="card">
+    <h2>3. Prioritisation and scoring</h2>
+    {% for lens in fw.lenses %}
+      <h3 class="section-title" style="margin-top:.6rem">{{ lens.label }} <small class="muted">weight {{ lens.weight }}</small></h3>
+      <ul style="margin-top:0">{% for q in lens.questions %}<li>{{ q }}</li>{% endfor %}</ul>
+    {% endfor %}
+    <p style="font-size:.9rem"><strong>Ranking rule.</strong> Ratings convert to points ({% for l in fw.levels %}{{ l.label }} {{ l.points }}{{ ', ' if not loop.last }}{% endfor %}),
+      weighted and scaled to 100. Ties break on smaller size, then higher desirability. A rank agreed at portfolio review overrides the computed rank and is logged.</p>
+    <p style="font-size:.9rem"><strong>Flags.</strong> {% for k, v in fw.raw.scoring.flags.items() %}Low {{ k }}: "{{ v }}". {% endfor %}</p>
+  </div>
+
+  <div class="card">
+    <h2>4. Governance and sequencing</h2>
+    <p>Prioritised use cases move to <em>{{ fw.status_labels['approved'] }}</em> once the accountable owner confirms sequencing. The portfolio pack export (ranked table, sizing matrix and one Lean Canvas per use case) is the review artefact.</p>
+    <h3 class="section-title">Lean Canvas sections</h3>
+    <ul>{% for s in fw.canvas_sections %}<li><strong>{{ s.title }}:</strong> {{ s.guidance }}</li>{% endfor %}</ul>
+  </div>
+
+  <div class="card span2 soft">
+    <h2>Where AI helps, and where people decide</h2>
+    <div class="grid g3">
+      <div><h3>AI drafts</h3><p class="muted">Use cases from workshop notes, sharper stories and gap statements, size and data needs, DFV ratings with reasons, Lean Canvas, starter SQL, UI mock-ups.</p></div>
+      <div><h3>People decide</h3><p class="muted">Qualification, the agreed size cell, every lens rating, agreed rank and approval. AI suggestions are stored apart from agreed values, and overrides are logged.</p></div>
+      <div><h3>Current setup</h3><p class="muted">Framework: {{ settings.framework }}<br>AI: {{ provider.label }}<br>Catalogue: {{ catalog_status.label }}</p></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ uc.ref }} Lean Canvas</title>
+{% set c = fw.raw.brand.colours %}
+<style>:root { --ink: {{ c.ink }}; --accent: {{ c.accent }}; --blue: {{ c.blue }}; --blue-light: {{ c.blue_light }}; --green: {{ c.green }}; --surface: {{ c.surface }}; --border: {{ c.border }}; }</style>
+<link rel="stylesheet" href="/static/css/app.css">
+<style>
+  @page { size: A4 landscape; margin: 10mm; }
+  body { background: #fff; }
+  main { max-width: 1400px; padding: 1.2rem; }
+  .canvas .box { min-height: 200px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="row between">
+    <div><h1 style="margin:0">{{ fw.raw.lean_canvas.title }}: {{ uc.title }}</h1>
+      <p class="subtitle" style="margin:.2rem 0 1rem">{{ uc.story or fw.raw.lean_canvas.subtitle }}</p></div>
+    <div class="muted" style="text-align:right;font-size:.85rem">{{ uc.ref }}{% if uc.size %} · {{ fw.size_by_key[uc.size].label }}{% endif %}{% if uc.scores %} · {% for k, v in uc.scores.items() %}{{ k[0]|upper }}:{{ v }} {% endfor %}{% endif %}</div>
+  </div>
+  <div class="canvas">
+    {% for s in fw.canvas_sections %}
+    <div class="box b-{{ s.key }}"><h4>{{ s.title }}</h4><div class="content">{{ uc.canvas.get(s.key) or 'TBC' }}</div></div>
+    {% endfor %}
+  </div>
+  <p class="muted no-print" style="margin-top:1rem">Use your browser's print dialog (landscape) to save as PDF.</p>
+</main>
+</body>
+</html>

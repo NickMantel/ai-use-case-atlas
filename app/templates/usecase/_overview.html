@@ -1,0 +1,55 @@
+{% import "macros.html" as m %}
+<form method="post" action="/usecases/{{ uc.ref }}/edit">
+<div class="grid g2">
+  <div class="stack">
+    <div class="card">
+      <div class="row between"><h2 class="section-title" style="margin:0">Captured as</h2></div>
+      <div class="story-box" style="margin-top:.75rem" data-story-preview data-placeholder="{{ fw.raw.workshop.story.example }}">{{ uc.story }}</div>
+      <div class="field" style="margin-top:1rem"><label for="role">As a</label><input id="role" type="text" name="role" value="{{ uc.role or '' }}"></div>
+      <div class="field"><label for="need">I need</label><textarea id="need" name="need" rows="2">{{ uc.need or '' }}</textarea></div>
+      <div class="field"><label for="outcome">So that</label><textarea id="outcome" name="outcome" rows="2">{{ uc.outcome or '' }}</textarea></div>
+      <div class="field"><label for="gap_statement">The gap <span class="hint">(today vs the ideal world)</span></label><textarea id="gap_statement" name="gap_statement" rows="3">{{ uc.gap_statement or '' }}</textarea></div>
+    </div>
+    <div class="card">
+      <h2 class="section-title">Details</h2>
+      <div class="field"><label for="title">Title</label><input id="title" type="text" name="title" value="{{ uc.title }}"></div>
+      <div class="inline-fields">
+        <div class="field"><label for="domain">Domain</label>
+          <select id="domain" name="domain"><option value="">None</option>{% for d in fw.raw.domains %}<option {{ 'selected' if uc.domain == d }}>{{ d }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="solution_type">Solution type</label>
+          <select id="solution_type" name="solution_type"><option value="">Not sure yet</option>{% for s in fw.raw.solution_types %}<option value="{{ s.key }}" {{ 'selected' if uc.solution_type == s.key }}>{{ s.label }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="use_case_lead">Use case lead</label><input id="use_case_lead" type="text" name="use_case_lead" value="{{ uc.use_case_lead or '' }}"></div>
+        <div class="field"><label for="sponsor">Sponsor</label><input id="sponsor" type="text" name="sponsor" value="{{ uc.sponsor or '' }}"></div>
+      </div>
+      <div class="field"><label for="intake_round_id">Workshop</label>
+        <select id="intake_round_id" name="intake_round_id"><option value="">None</option>{% for r in rounds %}<option value="{{ r.id }}" {{ 'selected' if uc.intake_round_id == r.id }}>{{ r.name }}</option>{% endfor %}</select></div>
+    </div>
+  </div>
+
+  <div class="stack">
+    {% for section in fw.raw.workshop.sections %}
+    <div class="card">
+      <h2 class="section-title">{{ section.title }}</h2>
+      {% for q in section.questions %}
+      <div class="field"><label for="answer_{{ q.key }}">{{ q.text }}</label>
+        <textarea id="answer_{{ q.key }}" name="answer_{{ q.key }}" rows="2">{{ uc.workshop_answers.get(q.key, '') }}</textarea></div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<div class="row" style="margin-top:1rem">
+  <button type="submit">Save changes</button>
+  <span class="muted" style="font-size:.85rem">Captured by {{ uc.created_by or 'unknown' }} on {{ uc.created_at.strftime('%d %b %Y') }}</span>
+</div>
+</form>
+
+<div class="card" style="margin-top:1rem">
+  <div class="row between">
+    <div><h2 style="margin:0">Sharpen the story</h2><p class="muted" style="margin:0">Drafts a crisper story and gap from what was captured, plus follow-up questions. Nothing changes until you apply it.</p></div>
+    <form hx-post="/usecases/{{ uc.ref }}/ai/story" hx-target="#story-suggestion" hx-swap="innerHTML" hx-indicator="#story-spin">
+      <button type="submit" class="ai"><span id="story-spin" class="spinner"></span><span class="ai-mark">AI</span> Suggest</button>
+    </form>
+  </div>
+  <div id="story-suggestion"></div>
+</div>

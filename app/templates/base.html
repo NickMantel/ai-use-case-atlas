@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ fw.raw.brand.product_name }}{% endblock %}{% if fw.raw.brand.client_name %} · {{ fw.raw.brand.client_name }}{% endif %}</title>
+  {% set c = fw.raw.brand.colours %}
+  <style>:root { --ink: {{ c.ink }}; --accent: {{ c.accent }}; --blue: {{ c.blue }}; --blue-light: {{ c.blue_light }}; --green: {{ c.green }}; --green-light: {{ c.green_light }}; --rose-light: {{ c.rose_light }}; --surface: {{ c.surface }}; --border: {{ c.border }}; }</style>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script src="/static/js/htmx.min.js" defer></script>
+</head>
+<body>
+{% set path = request.url.path %}
+<header class="topbar">
+  <div class="inner">
+    <a class="brand" href="/">
+      <svg class="mark" viewBox="0 0 22 16" aria-hidden="true"><path d="M1 15 L7 3 L13 15 Z" fill="{{ c.blue_light }}"/><path d="M7 15 L14 1 L21 15 Z" fill="{{ c.rose_light }}"/></svg>
+      {{ fw.raw.brand.product_name }}
+      {% if fw.raw.brand.client_name %}<span class="client">{{ fw.raw.brand.client_name }}</span>{% endif %}
+    </a>
+    <nav class="main" aria-label="Main">
+      <a href="/" class="{{ 'active' if path == '/' }}">Overview</a>
+      <a href="/usecases/new" class="{{ 'active' if path.startswith('/usecases/new') }}">Capture</a>
+      <a href="/backlog" class="{{ 'active' if path.startswith('/backlog') }}">Backlog</a>
+      <a href="/portfolio" class="{{ 'active' if path.startswith('/portfolio') }}">Portfolio</a>
+      <a href="/rounds" class="{{ 'active' if path.startswith('/rounds') }}">Workshops</a>
+      <a href="/framework" class="{{ 'active' if path.startswith('/framework') }}">How it works</a>
+    </nav>
+    <div class="who">
+      {% if user_from_proxy %}
+        Signed in as {{ user }}
+      {% else %}
+        <form method="post" action="/whoami" class="row" style="gap:.35rem">
+          <input type="hidden" name="next" value="{{ request.url.path }}">
+          <label for="whoami" style="color:#c6d3e6;margin:0;font-weight:400">You are</label>
+          <input id="whoami" type="text" name="name" value="{{ '' if user == 'anonymous' else user }}" placeholder="Your name" required>
+          <button class="secondary small" type="submit">Set</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</header>
+{% if provider.stub or not provider.ok %}
+<div class="banner-stub"><div class="inner">
+  {% if provider.stub %}AI is running on the <strong>offline stub</strong>: suggestions are keyword heuristics for demos, not model judgements. Set <code>LLM_PROVIDER</code> to use a model.
+  {% else %}AI provider {{ provider.label }}.{% endif %}
+</div></div>
+{% endif %}
+<main>
+  {% if msg %}<div class="flash ok" role="status">{{ msg }}</div>{% endif %}
+  {% if err %}<div class="flash err" role="alert">{{ err }}</div>{% endif %}
+  {% block content %}{% endblock %}
+  <div class="footer">{{ fw.raw.brand.product_name }} · {{ fw.raw.brand.org_name }} · AI: {{ provider.label }} · Catalogue: {{ catalog_status.label }}</div>
+</main>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

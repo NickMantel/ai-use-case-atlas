@@ -1,0 +1,4 @@
+# Install only what the deployment needs.
+databricks-sdk>=0.40          # CATALOG_ADAPTER=unity_catalog
+google-cloud-bigquery>=3.25   # CATALOG_ADAPTER=bigquery
+google-auth>=2.30             # LLM_PROVIDER=vertex (Claude on Vertex AI)

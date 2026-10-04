@@ -1,0 +1,36 @@
+# Australia Post overlay (starter). Deep-merged over default.yaml when FRAMEWORK=auspost.
+# Domains and owners are placeholders until discovery confirms them.
+brand:
+  client_name: Australia Post
+
+scoring:
+  lenses:
+    - key: desirability
+      label: Desirability
+      summary: Real people actually want it
+      weight: 1.0
+      questions:
+        - Does it solve a problem team members or customers feel today?
+        - Would the named role actually use the output?
+    - key: feasibility
+      label: Feasibility
+      summary: The technology and team can realistically deliver it
+      weight: 1.0
+      questions:
+        - Is the data available, accessible and good enough?
+        - Can the data platform team build and support it with current capability?
+    - key: viability
+      label: Viability
+      summary: It drives measurable business value
+      weight: 1.0
+      questions:
+        - Does it justify the ongoing cost to run and maintain?
+        - Does it hold up against competing priorities?
+
+domains:
+  - Parcels and logistics
+  - Retail and post offices
+  - Customer and contact centre
+  - Finance
+  - People
+  - Other

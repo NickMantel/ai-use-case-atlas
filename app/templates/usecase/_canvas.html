@@ -1,0 +1,27 @@
+{% import "macros.html" as m %}
+<div class="row between" style="margin-bottom:1rem">
+  <div>
+    <h2 style="margin:0">{{ fw.raw.lean_canvas.title }}</h2>
+    <p class="muted" style="margin:0">{{ fw.raw.lean_canvas.subtitle }}{% if uc.canvas_generated_at %} · drafted {{ uc.canvas_generated_at.strftime('%d %b %Y %H:%M') }}{% endif %}</p>
+  </div>
+  <div class="row no-print">
+    <form method="post" action="/usecases/{{ uc.ref }}/ai/canvas" {% if uc.canvas %}data-confirm="Replace the current canvas with a new AI draft?"{% endif %}>
+      {{ m.ai_button('Draft canvas' if not uc.canvas else 'Redraft canvas', 'Drafting…') }}
+    </form>
+    <a class="btn secondary" href="/usecases/{{ uc.ref }}/canvas.pptx">PowerPoint</a>
+    <a class="btn secondary" href="/usecases/{{ uc.ref }}/canvas/print" target="_blank">Print view</a>
+  </div>
+</div>
+<p class="muted" style="font-size:.85rem">The draft uses the story, workshop answers, agreed size and scores, and catalogue evidence. Run sizing first for better Required Data and Systems content. Lines starting "TBC" need confirming.</p>
+<form method="post" action="/usecases/{{ uc.ref }}/canvas">
+  <div class="canvas">
+    {% for s in fw.canvas_sections %}
+    <div class="box b-{{ s.key }}">
+      <h4>{{ s.title }}</h4>
+      <div class="guide">{{ s.guidance }}</div>
+      <textarea name="canvas_{{ s.key }}" aria-label="{{ s.title }}">{{ uc.canvas.get(s.key, '') }}</textarea>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="row" style="margin-top:1rem"><button type="submit">Save canvas</button></div>
+</form>

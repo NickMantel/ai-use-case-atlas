@@ -1,0 +1,57 @@
+# SYNTHETIC demo catalogue for a university lakehouse. Not client data.
+# Medallion layers are inferred from schema names (bronze/silver/gold).
+dialect: Databricks SQL
+tables:
+  # --- Student domain ---------------------------------------------------------
+  - full_name: edp.gold_student.fact_unit_enrolment
+    description: One row per student per unit offering per census date. Conformed from the student system.
+    tags: {review_status: reviewed, sensitivity: restricted_to_staff}
+    owner: student-data-owners
+    last_updated: "2026-09-30"
+    columns: [student_key, unit_offering_key, census_date, enrolment_status, load_eftsl, campus_code, study_period]
+  - full_name: edp.gold_student.dim_unit_offering
+    description: Unit offerings by study period, campus and mode.
+    tags: {review_status: reviewed, sensitivity: public}
+    columns: [unit_offering_key, unit_code, unit_title, faculty_code, study_period, campus_code, delivery_mode]
+  - full_name: edp.gold_student.dim_student
+    description: Student demographics and program attempt attributes.
+    tags: {review_status: reviewed, sensitivity: strictly_confidential}
+    columns: [student_key, student_id, cohort_year, program_code, citizenship_band, equity_group_flag]
+  - full_name: edp.silver_student.unit_results
+    description: Assessment and final unit results, cleansed.
+    tags: {review_status: pending, sensitivity: restricted_to_staff}
+    columns: [student_id, unit_code, study_period, assessment_item, mark, grade]
+  - full_name: edp.silver_student.admissions_applications
+    description: Applications and offers by intake.
+    tags: {review_status: reviewed, sensitivity: restricted_to_staff}
+    columns: [application_id, applicant_id, program_code, intake, offer_status, offer_date]
+  - full_name: edp.bronze_lms.activity_events
+    description: Raw LMS clickstream events (logins, content views, submissions).
+    tags: {review_status: pending, sensitivity: restricted_to_staff}
+    columns: [event_id, user_id, course_id, event_type, event_ts]
+  # --- Teaching and workload --------------------------------------------------
+  - full_name: edp.bronze_timetable.class_sessions
+    description: Raw timetable extract of scheduled class sessions.
+    tags: {review_status: pending}
+    columns: [session_id, unit_code, study_period, session_type, room_code, start_ts, capacity]
+  - full_name: edp.bronze_hr.academic_workload_allocations
+    description: Raw extract of academic workload allocations by unit and staff member.
+    tags: {review_status: pending, sensitivity: restricted_to_staff}
+    columns: [staff_id, unit_code, study_period, allocation_hours, role_type]
+  # --- Finance domain ---------------------------------------------------------
+  - full_name: edp.gold_finance.fact_gl_actuals
+    description: General ledger actuals by month, cost centre and account.
+    tags: {review_status: reviewed, sensitivity: restricted_to_staff}
+    columns: [period_month, cost_centre, account_code, amount_aud, journal_source]
+  - full_name: edp.gold_finance.fact_budget
+    description: Approved budget and forecast versions by month, cost centre and account.
+    tags: {review_status: reviewed, sensitivity: restricted_to_staff}
+    columns: [period_month, cost_centre, account_code, version, budget_aud]
+  - full_name: edp.silver_finance.supplier_invoices
+    description: Accounts payable invoices, cleansed.
+    tags: {review_status: reviewed, sensitivity: restricted_to_staff}
+    columns: [invoice_id, supplier_id, invoice_date, amount_aud, cost_centre, status]
+  - full_name: edp.gold_finance.dim_cost_centre
+    description: Cost centre hierarchy to faculty and division.
+    tags: {review_status: reviewed, sensitivity: public}
+    columns: [cost_centre, cost_centre_name, faculty_code, division]

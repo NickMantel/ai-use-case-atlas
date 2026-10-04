@@ -1,0 +1,5 @@
+{% import "macros.html" as m %}
+<div class="card soft" style="margin-top:1rem">
+  <div class="row between"><h3 class="section-title" style="margin:0">Suggested story</h3>{{ m.stub_tag(draft.meta) }}</div>
+  {% include "partials/story_form.html" %}
+</div>

@@ -1,0 +1,19 @@
+# Databricks Apps manifest. See docs/deployment.md.
+command: ["python", "run.py"]
+env:
+  - name: FRAMEWORK
+    value: "deakin"
+  - name: LLM_PROVIDER
+    value: "databricks"             # Model Serving via the app's service principal
+  - name: LLM_MODEL
+    valueFrom: "serving-endpoint"   # app resource: model serving endpoint (CAN QUERY)
+  - name: CATALOG_ADAPTER
+    value: "unity_catalog"
+  - name: UC_WAREHOUSE_ID
+    valueFrom: "sql-warehouse"      # app resource: SQL warehouse
+  - name: UC_CATALOGS
+    value: "edp"
+  - name: DATABASE_URL
+    valueFrom: "atlas-db-url"       # app resource: secret with a Lakebase/Postgres URL
+  - name: SEED_DEMO_DATA
+    value: "false"

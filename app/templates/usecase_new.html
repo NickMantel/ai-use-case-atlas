@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Capture · {{ fw.raw.brand.product_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Capture a use case</h1>
+    <p class="subtitle">{{ fw.raw.workshop.principle }}</p>
+  </div>
+</div>
+
+<form method="post" action="/usecases/new">
+  <div class="grid g2">
+    <div class="stack">
+      {% for section in fw.raw.workshop.sections %}
+      <div class="card">
+        <h2 class="section-title">{{ section.title }}</h2>
+        {% for q in section.questions %}
+        <div class="field">
+          <label for="answer_{{ q.key }}">{{ q.text }}</label>
+          <textarea id="answer_{{ q.key }}" name="answer_{{ q.key }}" rows="2"></textarea>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <h2 class="section-title">Captured as</h2>
+        <div class="story-box placeholder" data-story-preview data-placeholder="{{ fw.raw.workshop.story.example }}">{{ fw.raw.workshop.story.example }}</div>
+        <div class="field" style="margin-top:1rem">
+          <label for="role">As a <span class="hint">(specific role)</span></label>
+          <input id="role" type="text" name="role" placeholder="faculty workload planner">
+        </div>
+        <div class="field">
+          <label for="need">I need</label>
+          <textarea id="need" name="need" rows="2" placeholder="an early view of unit enrolment trends"></textarea>
+        </div>
+        <div class="field">
+          <label for="outcome">So that</label>
+          <textarea id="outcome" name="outcome" rows="2" placeholder="I can adjust tutor allocations before term starts"></textarea>
+        </div>
+        <div class="field">
+          <label for="gap_statement">The gap <span class="hint">(today vs the ideal world)</span></label>
+          <textarea id="gap_statement" name="gap_statement" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Details</h2>
+        <div class="field">
+          <label for="title">Short title <span class="hint">(optional, e.g. "Teaching demand forecast")</span></label>
+          <input id="title" type="text" name="title">
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label for="domain">Domain</label>
+            <select id="domain" name="domain"><option value="">Choose…</option>{% for d in fw.raw.domains %}<option>{{ d }}</option>{% endfor %}</select>
+          </div>
+          <div class="field">
+            <label for="solution_type">Likely solution type</label>
+            <select id="solution_type" name="solution_type"><option value="">Not sure yet</option>{% for s in fw.raw.solution_types %}<option value="{{ s.key }}">{{ s.label }}</option>{% endfor %}</select>
+          </div>
+          <div class="field">
+            <label for="use_case_lead">Use case lead</label>
+            <input id="use_case_lead" type="text" name="use_case_lead">
+          </div>
+          <div class="field">
+            <label for="sponsor">Sponsor</label>
+            <input id="sponsor" type="text" name="sponsor">
+          </div>
+        </div>
+        <div class="field">
+          <label for="intake_round_id">Workshop</label>
+          <select id="intake_round_id" name="intake_round_id">
+            <option value="">None</option>
+            {% for r in rounds %}<option value="{{ r.id }}" {{ 'selected' if round_id == r.id }}>{{ r.name }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button type="submit" name="then" value="view">Save</button>
+        <button type="submit" name="then" value="another" class="secondary">Save and capture another</button>
+        <button type="submit" name="then" value="draft" class="ai" data-busy="Saving and drafting…"><span class="ai-mark">AI</span> Save and sharpen the story</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

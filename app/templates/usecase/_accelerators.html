@@ -1,0 +1,27 @@
+{% import "macros.html" as m %}
+<div class="grid g2">
+  <div class="card">
+    <div class="row between">
+      <div><h2 style="margin:0">Starter SQL</h2>
+        <p class="muted" style="margin:0;font-size:.85rem">A read-only feasibility query over the tables found during sizing. Shown for an engineer to run; the app never executes it.</p></div>
+      <form method="post" action="/usecases/{{ uc.ref }}/ai/sql">{{ m.ai_button('Draft SQL', 'Writing…') }}</form>
+    </div>
+    {% if uc.starter_sql %}
+      <pre class="sql" id="sql">{{ uc.starter_sql }}</pre>
+      <button type="button" class="secondary small" data-copy="#sql">Copy</button>
+    {% elif not (uc.catalog_evidence or {}).get('needs') %}
+      <div class="empty-state">Run sizing first so the query is grounded in real catalogue tables.</div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="row between">
+      <div><h2 style="margin:0">UI mock-up</h2>
+        <p class="muted" style="margin:0;font-size:.85rem">A low-fidelity picture of what the named role would see, to test desirability in the room. Numbers are illustrative.</p></div>
+      <form method="post" action="/usecases/{{ uc.ref }}/ai/mockup">{{ m.ai_button('Draft mock-up', 'Sketching…') }}</form>
+    </div>
+    {% if uc.mockup_html %}
+      <iframe class="mockup" sandbox="" src="/usecases/{{ uc.ref }}/mockup" title="UI mock-up for {{ uc.title }}" style="margin-top:.8rem"></iframe>
+      <a href="/usecases/{{ uc.ref }}/mockup" target="_blank" style="font-size:.85rem">Open full size</a>
+    {% endif %}
+  </div>
+</div>

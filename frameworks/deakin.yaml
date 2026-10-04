@@ -1,0 +1,72 @@
+# Deakin overlay. Deep-merged over default.yaml when FRAMEWORK=deakin.
+brand:
+  client_name: Deakin University
+
+workflow:
+  accountable_owner: >-
+    The EDP team runs the cycle end to end; domain owners and use case leads
+    own the content that feeds it.
+  maturity_note: >-
+    A workshop-paced cadence while volume is low, moving to a standing monthly
+    or quarterly review as intake grows across faculties.
+  open_questions:
+    - Which team the use case lead sits in.
+    - Whether faculties/divisions or the EDP team opens each intake round.
+  stages:
+    - key: ideation
+      number: 1
+      title: Ideation
+      owner: Use case lead (team to confirm) with EDP facilitation
+      cadence: Each time an intake round opens
+      statuses: [captured, in_review]
+    - key: sizing
+      number: 2
+      title: Sizing
+      owner: Use case lead and EDP team together
+      cadence: Within a week of intake
+      statuses: [qualified, sized]
+    - key: prioritisation
+      number: 3
+      title: Prioritisation and scoring
+      owner: Domain owners and the EDP team
+      cadence: Each portfolio review
+      statuses: [scored, prioritised]
+    - key: governance
+      number: 4
+      title: Governance and sequencing
+      owner: EDP team
+      cadence: Immediately following each review
+      statuses: [approved]
+
+scoring:
+  lenses:
+    - key: desirability
+      label: Desirability
+      summary: Real people actually want it
+      weight: 1.0
+      questions:
+        - Does it solve a problem staff or students feel today?
+        - Would the named role actually use the output?
+    - key: feasibility
+      label: Feasibility
+      summary: The technology and team can realistically deliver it
+      weight: 1.0
+      questions:
+        - Is the data available, accessible and good enough?
+        - Can the EDP team build and support it with current capability?
+    - key: viability
+      label: Viability
+      summary: It drives measurable business value
+      weight: 1.0
+      questions:
+        - Does it justify the ongoing cost to run and maintain?
+        - Does it hold up against competing priorities?
+
+domains:
+  - Student (admissions and enrolments)
+  - Finance
+  - Teaching and Learning
+  - Research
+  - People and Culture
+  - Faculty operations
+  - Other

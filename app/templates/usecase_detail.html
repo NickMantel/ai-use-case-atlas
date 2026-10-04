@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}{{ uc.ref }} {{ uc.title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div style="min-width:0">
+    <div class="row" style="gap:.5rem;margin-bottom:.35rem">
+      <span class="chip">{{ uc.ref }}</span>
+      {{ m.status(fw, uc.status) }}
+      {% if stage %}<span class="chip">Stage {{ stage.number }}: {{ stage.title }}</span>{% endif %}
+      {% if uc.domain %}<span class="chip">{{ uc.domain }}</span>{% endif %}
+      {% if uc.intake_round %}<a class="chip" href="/rounds/{{ uc.intake_round.id }}">{{ uc.intake_round.name }}</a>{% endif %}
+    </div>
+    <h1>{{ uc.title }}</h1>
+    {% if uc.story %}<p class="subtitle">{{ uc.story }}</p>{% endif %}
+  </div>
+  <form method="post" action="/usecases/{{ uc.ref }}/status" class="row no-print" style="gap:.4rem">
+    <select name="status" aria-label="Move to status" style="width:auto">
+      {% for s in fw.statuses %}<option value="{{ s.key }}" {{ 'selected' if s.key == uc.status }}>{{ s.label }}</option>{% endfor %}
+    </select>
+    <input type="text" name="comment" placeholder="Reason (optional)" style="width:12rem">
+    <button type="submit" class="secondary">Move</button>
+  </form>
+</div>
+
+<div class="grid g4" style="margin-bottom:.5rem">
+  <div class="card soft"><small>Size</small><div style="margin-top:.3rem">{{ m.size(fw, uc.size) }} {% if uc.size %}<small>{{ fw.size_by_key[uc.size].weeks }}</small>{% endif %}</div></div>
+  <div class="card soft"><small>Desirability · Feasibility · Viability</small><div class="row" style="gap:.3rem;margin-top:.3rem">{% for k in fw.lens_keys %}{{ m.level(fw, uc.scores.get(k)) }}{% endfor %}</div></div>
+  <div class="card soft"><small>Priority score</small><div class="kpi" style="font-size:1.4rem;margin-top:.2rem">{{ '%g'|format(score) if score is not none else '-' }}{% if score is not none %}<small style="font-size:.8rem">/100</small>{% endif %}</div></div>
+  <div class="card soft"><small>Rank</small><div class="kpi" style="font-size:1.4rem;margin-top:.2rem">{{ uc.agreed_rank or computed_rank or '-' }}</div><small>{{ 'agreed at review' if uc.agreed_rank else ('computed' if computed_rank else 'not ranked') }}</small></div>
+</div>
+{% if flags %}<div style="margin:.4rem 0">{% for f in flags %}<span class="flag">{{ f }}</span>{% endfor %}</div>{% endif %}
+
+<nav class="tabs no-print" aria-label="Use case sections">
+  {% set labels = {'overview': 'Overview', 'qualify': 'Qualify', 'size': 'Size', 'score': 'Score', 'canvas': 'Lean Canvas', 'accelerators': 'Accelerators', 'history': 'History'} %}
+  {% for t in ['overview', 'qualify', 'size', 'score', 'canvas', 'accelerators', 'history'] %}
+  <a href="/usecases/{{ uc.ref }}?tab={{ t }}" class="{{ 'active' if tab == t }}">{{ labels[t] }}</a>
+  {% endfor %}
+</nav>
+
+{% include "usecase/_" ~ tab ~ ".html" %}
+{% endblock %}

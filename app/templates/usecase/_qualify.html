@@ -1,0 +1,31 @@
+{% set q = fw.raw.qualification %}
+<div class="grid g2">
+  <form class="card" method="post" action="/usecases/{{ uc.ref }}/qualify">
+    <h2>Qualification</h2>
+    <p class="muted">{{ q.description }}</p>
+    <div class="checks">
+      {% for c in q.checks %}
+      <label><input type="checkbox" name="check_{{ c.key }}" {{ 'checked' if uc.qualification_checks.get(c.key) }}> {{ c.text }}</label>
+      {% endfor %}
+    </div>
+    <div class="inline-fields" style="margin-top:1rem">
+      <div class="field"><label for="outcome">Outcome</label>
+        <select id="outcome" name="outcome">{% for o in q.outcomes %}<option value="{{ o.key }}" {{ 'selected' if uc.qualification_outcome == o.key }}>{{ o.label }}</option>{% endfor %}</select></div>
+      <div class="field"><label for="merged_into">Merged into <span class="hint">(if merged)</span></label><input id="merged_into" type="text" name="merged_into" placeholder="UC-001" value="{{ uc.merged_into_ref or '' }}"></div>
+    </div>
+    <div class="field"><label for="note">Note <span class="hint">(required to park, reject, or qualify with gaps)</span></label><textarea id="note" name="note" rows="3">{{ uc.qualification_note or '' }}</textarea></div>
+    <button type="submit">Record decision</button>
+  </form>
+
+  <div class="card soft">
+    <h2>What we are checking</h2>
+    <div class="story-box">{{ uc.story or 'No story captured yet. Complete the overview first.' }}</div>
+    <p style="margin-top:.8rem"><strong>Gap:</strong> {{ uc.gap_statement or 'Not stated' }}</p>
+    <p><strong>Use case lead:</strong> {{ uc.use_case_lead or 'Not identified' }}</p>
+    <div class="qa">
+      {% for qn in fw.workshop_questions if qn.section == 'today' %}
+      <div><div class="q">{{ qn.text }}</div><div class="a {{ '' if uc.workshop_answers.get(qn.key) else 'empty' }}">{{ uc.workshop_answers.get(qn.key) or 'Not captured' }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

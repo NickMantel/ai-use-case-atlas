@@ -1,0 +1,76 @@
+{% import "macros.html" as m %}
+{% set sz = fw.raw.sizing %}
+{% set sug = uc.sizing_suggestion or {} %}
+{% set ev = uc.catalog_evidence or {} %}
+<div class="grid g2">
+  <form class="card" method="post" action="/usecases/{{ uc.ref }}/size">
+    <h2>Size and effort read</h2>
+    <p class="muted">Pick the cell that matches scope and complexity (rows) and build effort and data availability (columns).</p>
+    <div class="matrix" role="radiogroup" aria-label="Sizing matrix">
+      <div></div>
+      {% for col in sz.columns.levels %}<div class="colhead"><strong>{{ col.label }}</strong><span>{{ col.description }}</span></div>{% endfor %}
+      {% for row in sz.rows.levels %}
+        <div class="rowhead"><strong>{{ row.label }}</strong><span>{{ row.description }}</span></div>
+        {% for col in sz.columns.levels %}
+          {% set key = sz.matrix[row.key][col.key] %}{% set s = fw.size_by_key[key] %}
+          {% set chosen = uc.scope_level == row.key and uc.effort_level == col.key %}
+          {% set suggested = sug.get('suggested_scope') == row.key and sug.get('suggested_effort') == col.key %}
+          <label class="cell" style="background: {{ s.colour }}">
+            <input type="radio" name="cell" value="{{ row.key }}|{{ col.key }}" {{ 'checked' if chosen or (not uc.size and suggested) }} required>
+            {{ s.label }}
+            {% if suggested %}<span class="ai-pick">AI</span>{% endif %}
+          </label>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    <div class="legend" style="margin-top:.8rem">{% for s in fw.sizes %}<span><i style="background: {{ s.colour }}"></i>{{ s.label }} {{ s.weeks }}</span>{% endfor %}</div>
+    <div class="field" style="margin-top:1rem"><label for="rationale">Rationale</label>
+      <textarea id="rationale" name="rationale" rows="3">{{ uc.sizing_rationale or ((sug.scope_rationale ~ ' ' ~ sug.effort_rationale) if sug else '') }}</textarea></div>
+    <input type="hidden" name="source" value="{{ 'ai' if sug and not uc.size else 'human' }}">
+    <button type="submit">Save size</button>
+    <p class="muted" style="margin-top:.8rem;font-size:.85rem">{{ sz.next_step }}</p>
+  </form>
+
+  <div class="stack">
+    <div class="card">
+      <div class="row between">
+        <div><h2 style="margin:0">Catalogue-informed suggestion</h2>
+          <p class="muted" style="margin:0;font-size:.85rem">Identifies the data this use case needs and checks it against {{ catalog_status.label }}.</p></div>
+        <form method="post" action="/usecases/{{ uc.ref }}/ai/size">{{ m.ai_button('Suggest size', 'Checking catalogue…') }}</form>
+      </div>
+      {% if sug %}
+      <div class="suggestion" style="margin-top:1rem">
+        <div class="head"><span>Suggested: {{ fw.size_by_key[sug.suggested_size].label if sug.suggested_size else '-' }} (scope {{ sug.suggested_scope }}, effort {{ sug.suggested_effort }})</span>{{ m.stub_tag(sug.meta) }}</div>
+        <div><strong>Scope:</strong> {{ sug.scope_rationale }}</div>
+        <div><strong>Effort:</strong> from {{ sug.effort_basis }}. {{ sug.effort_rationale }}</div>
+        {% if sug.outputs %}<div><strong>Outputs:</strong> {{ sug.outputs|join('; ') }}</div>{% endif %}
+        {% if sug.risks %}<div><strong>Risks:</strong> {{ sug.risks|join('; ') }}</div>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if ev.needs %}
+    <div class="card evidence">
+      <h2>Data needs and catalogue evidence</h2>
+      <p class="muted" style="font-size:.85rem">{{ ev.adapter }} · checked {{ ev.checked_at }}{% if ev.effort_from_catalog %} · effort read {{ ev.effort_from_catalog }}{% endif %}</p>
+      {% if ev.error %}<div class="flash err">Catalogue unavailable: {{ ev.error }}</div>{% endif %}
+      {% for need in ev.needs %}
+      <div style="margin-bottom:.9rem">
+        <div class="row between"><strong>{{ need.entity }}</strong>
+          <span class="badge {{ 'st-approved' if need.coverage == 'reuse' else ('st-sized' if need.coverage == 'develop' else 'st-rejected') }}">{{ need.coverage_label }}</span></div>
+        <div class="muted" style="font-size:.82rem">{{ need.purpose }}{% if need.likely_source %} · likely source {{ need.likely_source }}{% endif %} · searched: {{ need.search_terms|join(', ') }}</div>
+        {% if need.matches %}
+        <div class="table-wrap"><table>
+          <thead><tr><th>Table</th><th>Layer</th><th>Tags</th></tr></thead>
+          <tbody>{% for t in need.matches %}
+            <tr><td><code>{{ t.full_name }}</code><div class="muted">{{ t.description }}</div></td><td>{{ t.layer }}</td>
+                <td>{% for k, v in t.tags.items() %}<span class="chip">{{ k }}={{ v }}</span> {% endfor %}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
